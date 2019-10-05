@@ -256,25 +256,6 @@ void ListInsert(char *lrc,int n){
 	SendMessage(ui.lrclist,LVM_SETITEM,0,(LPARAM)&lvi);
 }
 
-/*void ImportLRC(HWND hwndDlg,char *file){
-	FILE *fp;
-	char buf[256],*p;
-	int n=0;
-	fp=fopen(file,"r");
-	if(!fp){
-		MessageBox(hwndDlg,"打开文件失败！","错误",MB_ICONSTOP);
-		return;
-	}
-	while(!feof(fp)){
-		fgets(buf,256,fp);
-		//预处理
-		for(p=buf;*p;p++){
-			if(*p=='\n')*p=0;
-		}
-		ListInsert(buf,n++);
-	}
-}*/
-
 void SaveLRC(HWND hwndDlg){
 	int i,n;
 	FILE *fp;
@@ -356,9 +337,7 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     	SetWindowLong(ui.lrclist,GWL_WNDPROC,(LONG)DlgList);
     	SendMessage(ui.lrc,WM_SETFONT,(WPARAM)ui.lrcfont,0);
     	ListInit(ui.lrclist);
-    	//ListInsert(GetDlgItem(hwndDlg,IDC_LIST1));
     	SetTimer(hwndDlg,114,500,TimerProc);
-    	//SetTextColor(GetDC(ui.lrc2),RGB(0,255,255));
     }
     return TRUE;
 
