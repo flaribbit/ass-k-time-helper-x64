@@ -1,5 +1,6 @@
 #define WINVER 0x0600
 #define _WIN32_IE 0x0600
+#define _W64
 #undef UNICODE
 #include <windows.h>
 #include <commctrl.h>
@@ -101,7 +102,7 @@ void OpenMusic(HWND hwndDlg){
 void MCIOpenMusic(MCIGLOBAL *mci){
 	mci->open.lpstrDeviceType=0;
 	mci->open.lpstrElementName=ui.file;
-	mciSendCommand(0,MCI_OPEN,MCI_OPEN_ELEMENT,(DWORD)&mci->open);
+	mciSendCommand(0,MCI_OPEN,MCI_OPEN_ELEMENT,(DWORD_PTR)&mci->open);
 }
 
 CALLBACK TIMERPROC TimerProc(HWND hWnd,UINT nMsg,UINT nTimerid,DWORD dwTime){
@@ -109,7 +110,7 @@ CALLBACK TIMERPROC TimerProc(HWND hWnd,UINT nMsg,UINT nTimerid,DWORD dwTime){
 	static char buf[32];
 	//获取音乐时间
 	mci.StatusParms.dwItem=MCI_STATUS_POSITION;
-	mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&(mci.StatusParms));
+	mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD_PTR)&(mci.StatusParms));
 	//
 	#define sec (mci.StatusParms.dwReturn/1000)
 	//printf("%d\n",mci.StatusParms.dwReturn);
@@ -164,12 +165,12 @@ BOOL CALLBACK DlgList(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_KEYUP:
 			//检查是否正在播放
 			mci.StatusParms.dwItem=MCI_STATUS_MODE;
-			mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&mci.StatusParms);
+			mciSendCommandA(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD_PTR)&mci.StatusParms);
 			//如果确实正在播放 屏蔽连按 检查是否已经k值
 			if(mci.StatusParms.dwReturn==MCI_MODE_PLAY&&lParam<0x1000000&&ktime.lrc[0]!='{'){
 				//获取位置
 				mci.StatusParms.dwItem=MCI_STATUS_POSITION;
-				mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&(mci.StatusParms));
+				mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD_PTR)&(mci.StatusParms));
 				//如果是按键按下 记录为开始时间
 				if(uMsg==WM_KEYDOWN){
 					ktime.s[ktime.si++]=mci.StatusParms.dwReturn;
@@ -307,7 +308,7 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SetBkMode   (ui.lrcdc,TRANSPARENT);
     	ui.listproc=(WNDPROC)GetWindowLong(ui.lrclist,GWLP_WNDPROC);
     	ListView_SetExtendedListViewStyle(GetDlgItem(hwndDlg,IDC_LIST1),LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-    	SetWindowLong(ui.lrclist,GWLP_WNDPROC,(LONG)DlgList);
+    	SetWindowLong(ui.lrclist,GWLP_WNDPROC,(LONG_PTR)DlgList);
     	SendMessage(ui.lrc,WM_SETFONT,(WPARAM)ui.lrcfont,0);
     	ListInit(ui.lrclist);
     	SetTimer(hwndDlg,114,500,(TIMERPROC)TimerProc);
@@ -327,7 +328,7 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case SB_ENDSCROLL:
 			mci.play.dwFrom=SendMessage(ui.timeline,TBM_GETPOS,0,0)*1000;
 			printf("%d\n",mci.play.dwFrom);
-			mciSendCommand(mci.open.wDeviceID,MCI_PLAY,MCI_FROM,(DWORD)&mci.play);
+			mciSendCommand(mci.open.wDeviceID,MCI_PLAY,MCI_FROM,(LONG_PTR)&mci.play);
 			break;
 		}
 	}
@@ -347,7 +348,7 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
         		MCIOpenMusic(&mci);
         		//获取音乐长度
         		mci.StatusParms.dwItem=MCI_STATUS_LENGTH;
-        		mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&mci.StatusParms);
+        		mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(LONG_PTR)&mci.StatusParms);
         		ui.duration=mci.StatusParms.dwReturn;
         		//设置滑块
         		SendMessage(ui.timeline,TBM_SETRANGE,1,(LPARAM)MAKELONG(0,ui.duration/1000));
@@ -367,12 +368,12 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			case BTN_PLAY:
 				//查询当前状态
 				mci.StatusParms.dwItem=MCI_STATUS_MODE;
-				mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&mci.StatusParms);
+				mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(LONG_PTR)&mci.StatusParms);
 				if(mci.StatusParms.dwReturn==MCI_MODE_PLAY){
-					mciSendCommand(mci.open.wDeviceID,MCI_PAUSE,0,(DWORD)&mci.play);
+					mciSendCommand(mci.open.wDeviceID,MCI_PAUSE,0,(LONG_PTR)&mci.play);
 					SetDlgItemText(hwndDlg,BTN_PLAY,">");
 				}else{
-					mciSendCommand(mci.open.wDeviceID,MCI_PLAY,0,(DWORD)&mci.play);
+					mciSendCommand(mci.open.wDeviceID,MCI_PLAY,0,(LONG_PTR)&mci.play);
 					SetDlgItemText(hwndDlg,BTN_PLAY,"||");
 				}
 				break;
