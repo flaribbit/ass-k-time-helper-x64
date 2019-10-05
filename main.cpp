@@ -302,7 +302,6 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     	ui.lrc     =GetDlgItem(hwndDlg,IDC_LRC);
     	ui.lrcfont =CreateFont(24,0,0,0,0,0,0,0,GB2312_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH,"微软雅黑");
 		ui.lrcdc   =GetDC(ui.lrc);
-		//ui.rich    =GetDlgItem(hwndDlg,IDC_RICHEDIT1);
 		SelectObject(ui.lrcdc,ui.lrcfont);
 		SetTextColor(ui.lrcdc,RGB(255,95,42));
 		SetBkMode   (ui.lrcdc,TRANSPARENT);
@@ -327,8 +326,14 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(LOWORD(wParam)){
 		case SB_ENDSCROLL:
 			mci.play.dwFrom=SendMessage(ui.timeline,TBM_GETPOS,0,0)*1000;
-			printf("%d\n",mci.play.dwFrom);
+			//printf("%d\n",mci.play.dwFrom);
 			mciSendCommand(mci.open.wDeviceID,MCI_PLAY,MCI_FROM,(LONG_PTR)&mci.play);
+			mci.StatusParms.dwItem=MCI_STATUS_MODE;
+			mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(LONG_PTR)&mci.StatusParms);
+			if(mci.StatusParms.dwReturn!=MCI_MODE_PLAY){
+				mciSendCommand(mci.open.wDeviceID,MCI_PAUSE,0,(LONG_PTR)&mci.play);
+				SetDlgItemText(hwndDlg,BTN_PLAY,">");
+			}
 			break;
 		}
 	}
