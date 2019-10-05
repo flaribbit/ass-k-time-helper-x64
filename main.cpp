@@ -424,5 +424,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
     hInst=hInstance;
     InitCommonControls();
+	HINSTANCE hUser32 = LoadLibrary("user32.dll");
+    if( hUser32 )
+	{
+		typedef BOOL ( WINAPI* LPSetProcessDPIAware )( void );
+		LPSetProcessDPIAware pSetProcessDPIAware = ( LPSetProcessDPIAware )GetProcAddress( hUser32, "SetProcessDPIAware" );
+		if( pSetProcessDPIAware )
+		{
+			pSetProcessDPIAware();
+		}
+		FreeLibrary( hUser32 );
+	}
     return DialogBox(hInst, MAKEINTRESOURCE(DLG_MAIN), NULL, (DLGPROC)DlgMain);
 }
