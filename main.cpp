@@ -306,9 +306,9 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SelectObject(ui.lrcdc,ui.lrcfont);
 		SetTextColor(ui.lrcdc,RGB(255,95,42));
 		SetBkMode   (ui.lrcdc,TRANSPARENT);
-    	ui.listproc=(WNDPROC)GetWindowLong(ui.lrclist,GWLP_WNDPROC);
+    	ui.listproc=(WNDPROC)GetWindowLongPtr(ui.lrclist,GWLP_WNDPROC);
     	ListView_SetExtendedListViewStyle(GetDlgItem(hwndDlg,IDC_LIST1),LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-    	SetWindowLong(ui.lrclist,GWLP_WNDPROC,(LONG_PTR)DlgList);
+    	SetWindowLongPtr(ui.lrclist,GWLP_WNDPROC,(LONG_PTR)DlgList);
     	SendMessage(ui.lrc,WM_SETFONT,(WPARAM)ui.lrcfont,0);
     	ListInit(ui.lrclist);
     	SetTimer(hwndDlg,114,500,(TIMERPROC)TimerProc);
