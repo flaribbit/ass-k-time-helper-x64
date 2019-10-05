@@ -27,12 +27,12 @@ struct{
 }ui;
 
 struct{
-	int s[100];//¿ªÊ¼Ê±¼ä
-	int e[100];//½áÊøÊ±¼ä
-	int index[100];//Ë÷Òı
+	int s[100];//å¼€å§‹æ—¶é—´
+	int e[100];//ç»“æŸæ—¶é—´
+	int index[100];//ç´¢å¼•
 	char lrc[256];
 	char dst[256];
-	int si,ei,syls,sel;//µ±Ç°Î»ÖÃ
+	int si,ei,syls,sel;//å½“å‰ä½ç½®
 	int doindex;
 }ktime;
 
@@ -46,10 +46,10 @@ void OpenLRC(HWND hwndDlg){
 	OPENFILENAME ofn;
     ZeroMemory(&ofn,sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFile = ui.lrcfile;//È«Â·¾¶
+    ofn.lpstrFile = ui.lrcfile;//å…¨è·¯å¾„
     ofn.lpstrFile[0] = 0;
     ofn.nMaxFile = sizeof(ui.lrcfile);
-    ofn.lpstrFilter = TEXT("¸è´ÊÎÄ¼ş(*.txt)\0*.txt\0");
+    ofn.lpstrFilter = TEXT("æ­Œè¯æ–‡ä»¶(*.txt)\0*.txt\0");
     ofn.nFilterIndex = 1;
     ofn.lpstrFileTitle = NULL;
     ofn.nMaxFileTitle = 0;
@@ -63,12 +63,12 @@ void OpenLRC(HWND hwndDlg){
 		int n=0;
 		fp=fopen(ui.lrcfile,"r");
 		if(!fp){
-			MessageBox(hwndDlg,"´ò¿ªÎÄ¼şÊ§°Ü£¡","´íÎó",MB_ICONSTOP);
+			MessageBox(hwndDlg,"æ‰“å¼€æ–‡ä»¶å¤±è´¥ï¼","é”™è¯¯",MB_ICONSTOP);
 			return;
 		}
 		while(!feof(fp)){
 			fgets(buf,256,fp);
-			//Ô¤´¦Àí
+			//é¢„å¤„ç†
 			for(p=buf;*p;p++){
 				if(*p=='\n')*p=0;
 			}
@@ -81,10 +81,10 @@ void OpenMusic(HWND hwndDlg){
 	OPENFILENAME ofn;
     ZeroMemory(&ofn,sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFile = ui.file;//È«Â·¾¶
+    ofn.lpstrFile = ui.file;//å…¨è·¯å¾„
     ofn.lpstrFile[0] = 0;
     ofn.nMaxFile = sizeof(ui.file);
-    ofn.lpstrFilter = TEXT("ÒôÆµÎÄ¼ş(*.mp3;*.aac;*.wav)\0*.mp3;*.aac;*.wav\0ËùÓĞÎÄ¼ş\0*.*\0");
+    ofn.lpstrFilter = TEXT("éŸ³é¢‘æ–‡ä»¶(*.mp3;*.aac;*.wav)\0*.mp3;*.aac;*.wav\0æ‰€æœ‰æ–‡ä»¶\0*.*\0");
     ofn.nFilterIndex = 1;
     ofn.lpstrFileTitle = NULL;
     ofn.nMaxFileTitle = 0;
@@ -107,7 +107,7 @@ void MCIOpenMusic(MCIGLOBAL *mci){
 CALLBACK TIMERPROC TimerProc(HWND hWnd,UINT nMsg,UINT nTimerid,DWORD dwTime){
 	static int t=0;
 	static char buf[32];
-	//»ñÈ¡ÒôÀÖÊ±¼ä
+	//è·å–éŸ³ä¹æ—¶é—´
 	mci.StatusParms.dwItem=MCI_STATUS_POSITION;
 	mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&(mci.StatusParms));
 	//
@@ -116,27 +116,28 @@ CALLBACK TIMERPROC TimerProc(HWND hWnd,UINT nMsg,UINT nTimerid,DWORD dwTime){
 	SendMessage(ui.timeline,TBM_SETPOS,1,sec);
 	sprintf(buf,"%02d:%02d/%02d:%02d\n",sec/60,sec%60,ui.duration/60000,ui.duration/1000%60);
 	SetWindowText(ui.time,buf);
+	return 0;
 }
 
 void IndexLRC(){
 	int i=0;
 	char *p=ktime.lrc;
-	//Èç¹ûÊÇ×ÖÄ¸ ¼ÇÎª¿ªÊ¼
+	//å¦‚æœæ˜¯å­—æ¯ è®°ä¸ºå¼€å§‹
 	while(*p){
-		ktime.index[i++]=p-ktime.lrc;//¼ÇÂ¼Î»ÖÃ
-		if(*p>0){//Åöµ½Ó¢ÎÄÕÒ½áÎ²
+		ktime.index[i++]=p-ktime.lrc;//è®°å½•ä½ç½®
+		if(*p>0){//ç¢°åˆ°è‹±æ–‡æ‰¾ç»“å°¾
 			while(*p>0){
 				p++;
-				//if(*p==' '||*p==','||*p=='.'){//´ËÀà½áÎ²ÔÙ+1
-				if(*p==' '){//´ËÀà½áÎ²ÔÙ+1
+				//if(*p==' '||*p==','||*p=='.'){//æ­¤ç±»ç»“å°¾å†+1
+				if(*p==' '){//æ­¤ç±»ç»“å°¾å†+1
 					p++;
 					break;
 				}
 			}
-		}else{//ÖĞÎÄ+2
+		}else{//ä¸­æ–‡+2
 			p+=2;
 		}
-		if(*p=='"'||*p==' '||*p=='('||*p==')')p++;//ºöÂÔµÄ·ûºÅ
+		if(*p=='"'||*p==' '||*p=='('||*p==')')p++;//å¿½ç•¥çš„ç¬¦å·
 	}
 	ktime.index[i]=p-ktime.lrc;
 	ktime.syls=i;
@@ -146,62 +147,62 @@ BOOL CALLBACK DlgList(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg){
 		case 0x10C1:
-			//»ñÈ¡µ±Ç°Ñ¡ÔñÏî
+			//è·å–å½“å‰é€‰æ‹©é¡¹
 			ktime.sel=ListView_GetNextItem(ui.lrclist,-1,LVIS_SELECTED);
 			if(ktime.sel>=0&&ktime.doindex){
-				//³õÊ¼»¯ Ë÷Òı¸è´Ê
+				//åˆå§‹åŒ– ç´¢å¼•æ­Œè¯
 				ktime.si=ktime.ei=0;
 				ListView_GetItemText(ui.lrclist,ktime.sel,2,ktime.lrc,256);
 				IndexLRC();
 				SetWindowText(ui.lrc,ktime.lrc);
-				//printf("³¤¶È£º%d\n",ktime.syls);
+				//printf("é•¿åº¦ï¼š%d\n",ktime.syls);
 			}
 			//
 			ktime.doindex^=1;
 			break;
 		case WM_KEYDOWN:
 		case WM_KEYUP:
-			//¼ì²éÊÇ·ñÕıÔÚ²¥·Å
+			//æ£€æŸ¥æ˜¯å¦æ­£åœ¨æ’­æ”¾
 			mci.StatusParms.dwItem=MCI_STATUS_MODE;
 			mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&mci.StatusParms);
-			//Èç¹ûÈ·ÊµÕıÔÚ²¥·Å ÆÁ±ÎÁ¬°´ ¼ì²éÊÇ·ñÒÑ¾­kÖµ
+			//å¦‚æœç¡®å®æ­£åœ¨æ’­æ”¾ å±è”½è¿æŒ‰ æ£€æŸ¥æ˜¯å¦å·²ç»kå€¼
 			if(mci.StatusParms.dwReturn==MCI_MODE_PLAY&&lParam<0x1000000&&ktime.lrc[0]!='{'){
-				//»ñÈ¡Î»ÖÃ
+				//è·å–ä½ç½®
 				mci.StatusParms.dwItem=MCI_STATUS_POSITION;
 				mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&(mci.StatusParms));
-				//Èç¹ûÊÇ°´¼ü°´ÏÂ ¼ÇÂ¼Îª¿ªÊ¼Ê±¼ä
+				//å¦‚æœæ˜¯æŒ‰é”®æŒ‰ä¸‹ è®°å½•ä¸ºå¼€å§‹æ—¶é—´
 				if(uMsg==WM_KEYDOWN){
 					ktime.s[ktime.si++]=mci.StatusParms.dwReturn;
 					//strncpy(buf,ktime.lrc,ktime.index[ktime.si]);
 					//buf[ktime.index[ktime.si]]=0;
 					//SetWindowText(ui.lrc,buf);
-					//ÌáÊ¾ÎÄ×Ö
+					//æç¤ºæ–‡å­—
 					TextOut(ui.lrcdc,0,0,ktime.lrc,ktime.index[ktime.si]);
 				}
-				//·ñÔò¼ÇÂ¼Îª½áÊøÊ±¼ä
+				//å¦åˆ™è®°å½•ä¸ºç»“æŸæ—¶é—´
 				else{
 					ktime.e[ktime.ei++]=mci.StatusParms.dwReturn;
-					//Èç¹ûÒ»¾ä»°Íê³ÉÁË
+					//å¦‚æœä¸€å¥è¯å®Œæˆäº†
 					if(ktime.ei>=ktime.syls){
-						//Ğ´ÈëÊı¾İ
+						//å†™å…¥æ•°æ®
 						char *pd=ktime.dst;
-						int lend=mci.StatusParms.dwReturn;//Ê±¼ä×ª´¢·½±ãµ÷ÓÃ
+						int lend=mci.StatusParms.dwReturn;//æ—¶é—´è½¬å‚¨æ–¹ä¾¿è°ƒç”¨
 						ktime.s[ktime.si]=lend;
 						for(int i=0,j=0;i<ktime.syls;i++){
-							//Ğ´kÊ±¼ä
+							//å†™kæ—¶é—´
 							sprintf(buf,"{\\k%d}",(ktime.s[i+1]-ktime.s[i])/10);
 							//puts(buf);
 							for(j=0;buf[j];j++){
 								*pd++=buf[j];
 							}
-							//Ğ´¸è´Ê
+							//å†™æ­Œè¯
 							for(j=ktime.index[i];j<ktime.index[i+1];j++){
 								*pd++=ktime.lrc[j];
 							}
 						}
 						*pd=0;
 						//puts(ktime.dst);
-						//Êı¾İĞ´ÈëÁĞ±í
+						//æ•°æ®å†™å…¥åˆ—è¡¨
 						ListView_SetItemText(ui.lrclist,ktime.sel,2,ktime.dst);
 						sprintf(buf,"%02d:%02d.%02d",ktime.s[0]/60000,ktime.s[0]%60000/1000,ktime.s[0]%1000/10);
 						ListView_SetItemText(ui.lrclist,ktime.sel,0,buf);
@@ -212,7 +213,7 @@ BOOL CALLBACK DlgList(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						}
 						printf("\n\n");*/
 						//ListView_SetHotItem(ui.lrclist,ktime.sel+1);
-						//×ªµ½ÏÂÒ»ĞĞ
+						//è½¬åˆ°ä¸‹ä¸€è¡Œ
 						SendMessage(ui.lrclist,WM_KEYDOWN,VK_DOWN,0);
 					}
 				}
@@ -235,10 +236,10 @@ BOOL CALLBACK DlgList(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void ListInit(HWND hlist){
 	LV_COLUMN lvc;
 	lvc.mask=LVCF_TEXT|LVCF_WIDTH;
-	#define _col(s,w,n) lvc.pszText=s;lvc.cx=w;SendMessage(hlist,LVM_INSERTCOLUMN,n,(LPARAM)&lvc);
-	_col("¿ªÊ¼Ê±¼ä",72,0);
-	_col("½áÊøÊ±¼ä",72,1);
-	_col("ÄÚÈİ"    ,420,2);
+	#define _col(s,w,n) lvc.pszText=(char *)s;lvc.cx=w;SendMessage(hlist,LVM_INSERTCOLUMN,n,(LPARAM)&lvc);
+	_col("å¼€å§‹æ—¶é—´",72,0);
+	_col("ç»“æŸæ—¶é—´",72,1);
+	_col("å†…å®¹",420,2);
 }
 
 void ListInsert(char *lrc,int n){
@@ -247,7 +248,7 @@ void ListInsert(char *lrc,int n){
 	lvi.cchTextMax=256;
 	lvi.iItem=n;
 	lvi.iSubItem=0;
-	lvi.pszText="00:00.00";
+	lvi.pszText=(char *)"00:00.00";
 	SendMessage(ui.lrclist,LVM_INSERTITEM,0,(LPARAM)&lvi);
 	lvi.iSubItem=1;
 	SendMessage(ui.lrclist,LVM_SETITEM,0,(LPARAM)&lvi);
@@ -263,10 +264,10 @@ void SaveLRC(HWND hwndDlg){
 	char filename[MAX_PATH],time1[16],time2[16],lrc[256];
     ZeroMemory(&ofn,sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFile = filename;//È«Â·¾¶
+    ofn.lpstrFile = filename;//å…¨è·¯å¾„
     ofn.lpstrFile[0] = 0;
     ofn.nMaxFile = sizeof(filename);
-    ofn.lpstrFilter = TEXT("ÎÄ±¾ÎÄ¼ş(*.txt)\0*.txt\0");
+    ofn.lpstrFilter = TEXT("æ–‡æœ¬æ–‡ä»¶(*.txt)\0*.txt\0");
     ofn.nFilterIndex = 1;
     ofn.lpstrFileTitle = NULL;
     ofn.nMaxFileTitle = 0;
@@ -287,57 +288,29 @@ void SaveLRC(HWND hwndDlg){
 	
 }
 
-void _ListInsert(HWND hlist){
-	LV_ITEM lvi;
-	ZeroMemory(&lvi,sizeof(lvi));
-	lvi.mask=LVIF_TEXT;
-	lvi.cchTextMax=256;
-	lvi.iItem=0;
-	lvi.iSubItem=0;
-	lvi.pszText="00";
-	SendMessage(hlist,LVM_INSERTITEM,0,(LPARAM)&lvi);
-	lvi.iSubItem=1;
-	lvi.pszText="01";
-	SendMessage(hlist,LVM_SETITEM,0,(LPARAM)&lvi);
-	lvi.iSubItem=2;
-	lvi.pszText="¹ş¹ş";
-	SendMessage(hlist,LVM_SETITEM,0,(LPARAM)&lvi);
-	
-	lvi.iItem=1;
-	lvi.iSubItem=0;
-	lvi.pszText="01";
-	SendMessage(hlist,LVM_INSERTITEM,0,(LPARAM)&lvi);
-	lvi.iSubItem=1;
-	lvi.pszText="02";
-	SendMessage(hlist,LVM_SETITEM,0,(LPARAM)&lvi);
-	lvi.iSubItem=2;
-	lvi.pszText="¹ş¹ş";
-	SendMessage(hlist,LVM_SETITEM,0,(LPARAM)&lvi);
-}
-
 BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch(uMsg)
     {
     case WM_INITDIALOG:
     {
-    	//»ñÈ¡¿Ø¼ş
+    	//è·å–æ§ä»¶
     	ui.lrclist =GetDlgItem(hwndDlg,IDC_LIST1);
     	ui.timeline=GetDlgItem(hwndDlg,SLIDER_MAIN);
     	ui.time    =GetDlgItem(hwndDlg,IDC_TIME);
     	ui.lrc     =GetDlgItem(hwndDlg,IDC_LRC);
-    	ui.lrcfont =CreateFont(24,0,0,0,0,0,0,0,GB2312_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH,"Î¢ÈíÑÅºÚ");
+    	ui.lrcfont =CreateFont(24,0,0,0,0,0,0,0,GB2312_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH,"å¾®è½¯é›…é»‘");
 		ui.lrcdc   =GetDC(ui.lrc);
 		//ui.rich    =GetDlgItem(hwndDlg,IDC_RICHEDIT1);
 		SelectObject(ui.lrcdc,ui.lrcfont);
 		SetTextColor(ui.lrcdc,RGB(255,95,42));
 		SetBkMode   (ui.lrcdc,TRANSPARENT);
-    	ui.listproc=(WNDPROC)GetWindowLong(ui.lrclist,GWL_WNDPROC);
+    	ui.listproc=(WNDPROC)GetWindowLong(ui.lrclist,GWLP_WNDPROC);
     	ListView_SetExtendedListViewStyle(GetDlgItem(hwndDlg,IDC_LIST1),LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-    	SetWindowLong(ui.lrclist,GWL_WNDPROC,(LONG)DlgList);
+    	SetWindowLong(ui.lrclist,GWLP_WNDPROC,(LONG)DlgList);
     	SendMessage(ui.lrc,WM_SETFONT,(WPARAM)ui.lrcfont,0);
     	ListInit(ui.lrclist);
-    	SetTimer(hwndDlg,114,500,TimerProc);
+    	SetTimer(hwndDlg,114,500,(TIMERPROC)TimerProc);
     }
     return TRUE;
 
@@ -368,15 +341,15 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				OpenLRC(hwndDlg);
 				break;
         	case IDM_MUSIC:
-        		//Ñ¡ÔñÎÄ¼ş
+        		//é€‰æ‹©æ–‡ä»¶
         		OpenMusic(hwndDlg);
-        		//´ò¿ªÒôÀÖ
+        		//æ‰“å¼€éŸ³ä¹
         		MCIOpenMusic(&mci);
-        		//»ñÈ¡ÒôÀÖ³¤¶È
+        		//è·å–éŸ³ä¹é•¿åº¦
         		mci.StatusParms.dwItem=MCI_STATUS_LENGTH;
         		mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&mci.StatusParms);
         		ui.duration=mci.StatusParms.dwReturn;
-        		//ÉèÖÃ»¬¿é
+        		//è®¾ç½®æ»‘å—
         		SendMessage(ui.timeline,TBM_SETRANGE,1,(LPARAM)MAKELONG(0,ui.duration/1000));
 				break;
 			case IDM_SAVE:
@@ -392,7 +365,7 @@ BOOL CALLBACK DlgMain(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			break;*/
 			case BTN_PLAY:
-				//²éÑ¯µ±Ç°×´Ì¬
+				//æŸ¥è¯¢å½“å‰çŠ¶æ€
 				mci.StatusParms.dwItem=MCI_STATUS_MODE;
 				mciSendCommand(mci.open.wDeviceID,MCI_STATUS,MCI_WAIT|MCI_STATUS_ITEM,(DWORD)&mci.StatusParms);
 				if(mci.StatusParms.dwReturn==MCI_MODE_PLAY){
